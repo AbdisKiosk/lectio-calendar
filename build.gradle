@@ -18,7 +18,18 @@ dependencies {
     implementation 'com.github.zentoc:LectioLogin:4578f37712'
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
+    implementation("org.mnode.ical4j:ical4j:4.2.0")
+    implementation("io.javalin:javalin:6.7.0")
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
 
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'me.abdiskiosk.lectiocalendar.Main'
+        )
+    }
 }
 
 test {

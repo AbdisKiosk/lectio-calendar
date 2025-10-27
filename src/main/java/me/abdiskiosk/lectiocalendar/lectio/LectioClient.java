@@ -7,6 +7,7 @@ import me.abdiskiosk.lectiocalendar.calendar.LectioCalendarEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 public class LectioClient {
@@ -20,25 +21,31 @@ public class LectioClient {
         session = login.loginLectio(schoolId);
     }
 
-    public @NotNull Collection<LectioCalendarEvent> getEvents(int weekNum) {
+    public @NotNull Collection<LectioCalendarEvent> getEvents(int year, int weekNum) {
         Page page = session.page();
-        page.navigate(generateUrl(weekNum));
+        System.out.println("LINK: " + generateUrl(year, weekNum));
+        page.navigate(generateUrl(year, weekNum));
 
+        page.waitForLoadState();
+        System.out.println("loaded");
 
-
-        context.close();
+        try {
+            return new LectioScheduleParser().parseSchedule(page, weekNum, year);
+        } catch (Exception e) {
+            System.err.println("Error parsing schedule: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
 
     @SuppressWarnings("deprecation")
-    protected String generateUrl(int weekNum) {
+    protected String generateUrl(int year, int weekNum) {
         String weekString = String.valueOf(weekNum);
         if(weekString.length() == 1) {
             weekString = "0" + weekString;
         }
-        int year = new Date().getYear();
         weekString += year;
-        String.format("https://www.lectio.dk/lectio/%s/SkemaNy.aspx?showtype=0&week=%s", schoolId, weekString);
+        return String.format("https://www.lectio.dk/lectio/%s/SkemaNy.aspx?showtype=0&week=%s", schoolId, weekString);
     }
 
 
