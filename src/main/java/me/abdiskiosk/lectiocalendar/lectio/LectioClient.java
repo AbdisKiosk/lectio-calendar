@@ -1,51 +1,30 @@
 package me.abdiskiosk.lectiocalendar.lectio;
 
 import com.microsoft.playwright.Page;
-import dk.zentoc.LectioLogin;
 import dk.zentoc.LectioSession;
-import me.abdiskiosk.lectiocalendar.calendar.LectioCalendarEvent;
+import lombok.SneakyThrows;
+import me.abdiskiosk.lectiocalendar.lectio.storage.LectioAuthStorage;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 public class LectioClient {
 
     private final String schoolId;
-    private LectioSession session;
+    private final LectioAuthStorage authStorage;
 
-    public LectioClient(@NotNull String schoolId) {
+    public LectioClient(@NotNull String schoolId, @NotNull LectioAuthStorage authStorage) throws IOException,
+            DataFormatException {
         this.schoolId = schoolId;
-        LectioLogin login = new LectioLogin();
-        session = login.loginLectio(schoolId);
+        this.authStorage = authStorage;
     }
 
-    public @NotNull Collection<LectioCalendarEvent> getEvents(int year, int weekNum) {
-        Page page = session.page();
-        System.out.println("LINK: " + generateUrl(year, weekNum));
-        page.navigate(generateUrl(year, weekNum));
-
-        page.waitForLoadState();
-        System.out.println("loaded");
-
-        try {
-            return new LectioScheduleParser().parseSchedule(page, weekNum, year);
-        } catch (Exception e) {
-            System.err.println("Error parsing schedule: " + e.getMessage());
-            return Collections.emptyList();
-        }
-    }
-
-
-    @SuppressWarnings("deprecation")
-    protected String generateUrl(int year, int weekNum) {
-        String weekString = String.valueOf(weekNum);
-        if(weekString.length() == 1) {
-            weekString = "0" + weekString;
-        }
-        weekString += year;
-        return String.format("https://www.lectio.dk/lectio/%s/SkemaNy.aspx?showtype=0&week=%s", schoolId, weekString);
+    @SneakyThrows
+    public @NotNull LectioWindow openWindow() {
+        LectioSession session = authStorage.loadOrCreate(schoolId);
+        authStorage.save(session);
+        return new LectioWindow(schoolId, session);
     }
 
 
