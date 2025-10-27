@@ -3,7 +3,7 @@
 ## Opsætning
 
 1. Opret en `.env`-fil i projektets rodmappe, baseret på `.env.example`.
-2. Udfyld `SKOLEID` i `.env`-filen. Dette er det tal, der står ved alle links, når du er logget ind på skolens system.
+2. Indsæt `SKOLEID` i `.env`-filen. Dette er det tal, der står ved alle links, når du er logget ind på skolens system.
 
 Eksempel på `.env`:
 SKOLEID=631
