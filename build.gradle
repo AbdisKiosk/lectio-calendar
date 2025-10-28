@@ -15,7 +15,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'io.github.cdimascio:dotenv-java:3.1.0'
-    implementation 'com.github.zentoc:LectioLogin:86ebf3c'
+    implementation 'com.github.zentoc:LectioLogin:ffee089a09'
     compileOnly 'org.projectlombok:lombok:1.18.42'
     annotationProcessor 'org.projectlombok:lombok:1.18.42'
     implementation("org.mnode.ical4j:ical4j:4.2.0")

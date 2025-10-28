@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import me.abdiskiosk.lectiocalendar.calendar.LectioCalendarEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,7 +20,7 @@ public class LectioScheduleParser {
 
         try {
             page.waitForSelector(".s2skemabrik.s2normal.s2brik",
-                    new Page.WaitForSelectorOptions().setTimeout(50));
+                    new Page.WaitForSelectorOptions().setTimeout(200));
         } catch (PlaywrightException e) {
             System.err.println("Timeout waiting for schedule table to load. Returning empty collection.");
             return events; // empty list
@@ -32,7 +33,19 @@ public class LectioScheduleParser {
 
         for (var brick : brickElements) {
             try {
-                LectioCalendarEvent event = parseScheduleBrick(brick, weekNum, year);
+                LectioCalendarEvent event = parseScheduleBrick(brick, weekNum, year, null);
+                if (event != null) {
+                    events.add(event);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to parse schedule brick: " + e.getMessage());
+            }
+        }
+
+        var cancelledBrickElements = new ArrayList<>(page.querySelectorAll(".s2skemabrik.s2cancelled.s2brik"));
+        for (var brick : cancelledBrickElements) {
+            try {
+                LectioCalendarEvent event = parseScheduleBrick(brick, weekNum, year, "CANCELLED");
                 if (event != null) {
                     events.add(event);
                 }
@@ -45,8 +58,10 @@ public class LectioScheduleParser {
     }
 
 
-    private LectioCalendarEvent parseScheduleBrick(ElementHandle brick, int weekNum, int year) throws ParseException {
+    private LectioCalendarEvent parseScheduleBrick(ElementHandle brick, int weekNum, int year, @Nullable String status)
+            throws ParseException {
         System.out.println(brick.innerHTML());
+        System.out.println(weekNum);
         // Extract tooltip data
         String tooltip = brick.getAttribute("data-tooltip");
         if (tooltip == null || tooltip.isEmpty()) {
@@ -73,6 +88,7 @@ public class LectioScheduleParser {
                 tooltipData.team,
                 tooltipData.teachers,
                 tooltipData.room,
+                status,
                 dates[0],
                 dates[1]
         );
@@ -80,7 +96,7 @@ public class LectioScheduleParser {
 
     private TooltipData parseTooltip(String tooltip) {
         if(tooltip.contains("Aflyst!")) {
-            return null;
+            tooltip = tooltip.replace("Aflyst   !\n", "");
         }
         if(tooltip.contains("Ændret!")) {
             tooltip = tooltip.replace("Ændret!\n", "");

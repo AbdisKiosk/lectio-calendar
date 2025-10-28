@@ -4,10 +4,7 @@ import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Description;
-import net.fortuna.ical4j.model.property.Location;
-import net.fortuna.ical4j.model.property.ProdId;
-import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.model.property.immutable.ImmutableCalScale;
 import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
 import net.fortuna.ical4j.util.RandomUidGenerator;
@@ -65,6 +62,9 @@ public class ICSFileGenerator {
             }
             if (!desc.isEmpty()) {
                 ve.add(new Description(desc.toString()));
+            }
+            if (e.getState() != null) {
+                ve.add(new Status(e.getState()));
             }
 
             calendar.add(ve);

@@ -2,6 +2,7 @@ package me.abdiskiosk.lectiocalendar.lectio.storage;
 
 import dk.zentoc.LectioLogin;
 import dk.zentoc.LectioSession;
+import dk.zentoc.LectioSessionData;
 import dk.zentoc.LectioSessionDataService;
 import me.abdiskiosk.lectiocalendar.lectio.LectioClient;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,10 @@ public class LectioAuthStorage {
 
     public LectioAuthStorage(@NotNull File saveFile) {
         this.saveFile = saveFile;
+    }
+
+    public void save(@NotNull LectioSessionData data) throws IOException {
+        new LectioSessionDataService().saveFromData(data);
     }
 
     public void save(@NotNull LectioSession session) throws IOException {

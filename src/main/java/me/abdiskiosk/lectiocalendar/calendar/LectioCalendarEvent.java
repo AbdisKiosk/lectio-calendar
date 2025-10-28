@@ -13,6 +13,7 @@ public class LectioCalendarEvent {
     private final @Nullable String team;
     private final @Nullable String teachers;
     private final @Nullable String room;
+    private final @Nullable String state;
     private final @NotNull Date start;
     private final @NotNull Date end;
 

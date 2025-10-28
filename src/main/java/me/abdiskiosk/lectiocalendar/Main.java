@@ -1,11 +1,10 @@
 package me.abdiskiosk.lectiocalendar;
 
-import dk.zentoc.LectioSession;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.SneakyThrows;
 import me.abdiskiosk.lectiocalendar.lectio.LectioClient;
 import me.abdiskiosk.lectiocalendar.lectio.storage.LectioAuthStorage;
-import me.abdiskiosk.lectiocalendar.server.ICSExportServer;
+import me.abdiskiosk.lectiocalendar.server.JavalinServer;
 
 import java.io.File;
 
@@ -22,7 +21,7 @@ public class Main {
         LectioAuthStorage auth = new LectioAuthStorage(new File("./auth.json"));
         LectioClient client = new LectioClient(SCHOOL_ID, auth);
 
-        new ICSExportServer(8080, API_KEY, client);
+        new JavalinServer(8080, API_KEY, client);
     }
 
 
