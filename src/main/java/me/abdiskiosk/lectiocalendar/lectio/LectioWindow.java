@@ -1,9 +1,7 @@
 package me.abdiskiosk.lectiocalendar.lectio;
 
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
 import dk.zentoc.LectioSession;
-import me.abdiskiosk.lectiocalendar.calendar.LectioCalendarEvent;
+import me.abdiskiosk.lectiocalendar.db.object.LectioCalendarEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

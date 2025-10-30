@@ -21,6 +21,7 @@ dependencies {
     implementation("org.mnode.ical4j:ical4j:4.2.0")
     implementation("io.javalin:javalin:6.7.0")
     implementation 'org.slf4j:slf4j-simple:2.0.16'
+    implementation("org.xerial:sqlite-jdbc:3.50.3.0")
 
 }
 

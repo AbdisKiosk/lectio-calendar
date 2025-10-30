@@ -2,6 +2,7 @@ package me.abdiskiosk.lectiocalendar.server;
 
 import io.javalin.Javalin;
 import io.javalin.http.UnauthorizedResponse;
+import me.abdiskiosk.lectiocalendar.db.dao.LectioCalendarEventDAO;
 import me.abdiskiosk.lectiocalendar.lectio.LectioClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,8 @@ public class JavalinServer {
     private final LectioClient lectioClient;
     private final Javalin app;
 
-    public JavalinServer(int port, @NotNull String auth, @NotNull LectioClient lectioClient) {
+    public JavalinServer(int port, @NotNull String auth, @NotNull LectioClient lectioClient,
+                         @NotNull LectioCalendarEventDAO lectioCalendarEventDAO) {
         this.lectioClient = lectioClient;
         app = Javalin.create(config ->
                 config.router.mount(router ->
@@ -23,10 +25,11 @@ public class JavalinServer {
         app.start(port);
 
 
-        ICSBrowserPage pages = new ICSBrowserPage(lectioClient.openWindow(), lectioClient.openWindow());
-        ICSExportServer exportServer = new ICSExportServer(pages);
+        ICSExportServer exportServer = new ICSExportServer(lectioCalendarEventDAO);
+        LectioUpdateCookieServer updateCookieServer = new LectioUpdateCookieServer(lectioClient);
 
         app.get("/schedule", exportServer::onRequest);
+        app.get("/updatecookie", updateCookieServer::onRequest);
 
     }
 

@@ -3,8 +3,7 @@ package me.abdiskiosk.lectiocalendar.lectio;
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
-import me.abdiskiosk.lectiocalendar.calendar.LectioCalendarEvent;
-import org.jetbrains.annotations.NotNull;
+import me.abdiskiosk.lectiocalendar.db.object.LectioCalendarEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.ParseException;
@@ -83,20 +82,24 @@ public class LectioScheduleParser {
             return null;
         }
 
+        //TODO: gør på en ordenlig måde
         return new LectioCalendarEvent(
+                0,
                 tooltipData.title,
                 tooltipData.team,
                 tooltipData.teachers,
                 tooltipData.room,
                 status,
+                weekNum,
                 dates[0],
-                dates[1]
+                dates[1],
+                new Date()
         );
     }
 
     private TooltipData parseTooltip(String tooltip) {
         if(tooltip.contains("Aflyst!")) {
-            tooltip = tooltip.replace("Aflyst   !\n", "");
+            tooltip = tooltip.replace("Aflyst!\n", "");
         }
         if(tooltip.contains("Ændret!")) {
             tooltip = tooltip.replace("Ændret!\n", "");

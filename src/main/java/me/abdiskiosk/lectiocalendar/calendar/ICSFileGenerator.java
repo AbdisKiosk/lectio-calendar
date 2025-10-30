@@ -1,5 +1,6 @@
 package me.abdiskiosk.lectiocalendar.calendar;
 
+import me.abdiskiosk.lectiocalendar.db.object.LectioCalendarEvent;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -13,11 +14,7 @@ import net.fortuna.ical4j.validate.ValidationException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 
 public class ICSFileGenerator {
