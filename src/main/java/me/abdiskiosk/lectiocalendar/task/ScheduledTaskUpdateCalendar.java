@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 public class ScheduledTaskUpdateCalendar implements Runnable {
 
     private static final long ALL_EVENTS_UPDATE_DELAY = 60 * 60 * 24 * 3 * 1000L;
-    private static final long CURRENT_WEEK_UPDATE_DELAY = 60 * 25 * 25 * 1000L;
+    private static final long CURRENT_WEEK_UPDATE_DELAY = 60 * 25 * 1000L;
 
     private final LectioCalendarEventDAO calendarEventDAO;
     private final LectioClient lectioClient;
@@ -29,15 +29,21 @@ public class ScheduledTaskUpdateCalendar implements Runnable {
 
     @SneakyThrows
     public void run() {
+        System.out.println("Running update calendar");
         int currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
         Date allEventsLastUpdated = calendarEventDAO.getOldest();
         Date currentWeekLastUpdated = calendarEventDAO.getOldest(currentWeek);
+
+        System.out.println("Last updated all events: " + allEventsLastUpdated);
+        System.out.println("Last updated current week: " + currentWeekLastUpdated);
 
 
         boolean updateAllEvents = allEventsLastUpdated == null ||
                 allEventsLastUpdated.before(new Date(System.currentTimeMillis() - ALL_EVENTS_UPDATE_DELAY));
         boolean updateCurrentWeek = currentWeekLastUpdated == null ||
                 currentWeekLastUpdated.before(new Date(System.currentTimeMillis() - CURRENT_WEEK_UPDATE_DELAY));
+
+        System.out.println("Should update all events: " + updateAllEvents);
 
         if(updateAllEvents) {
             updateAllEvents();
@@ -85,7 +91,7 @@ public class ScheduledTaskUpdateCalendar implements Runnable {
         calendarEventDAO.removeWeek(currentWeek);
 
         LectioWindow window = lectioClient.openWindow();
-        Collection<LectioCalendarEvent> events = window.getEvents(baseYear + 1, currentWeek);
+        Collection<LectioCalendarEvent> events = window.getEvents(baseYear , currentWeek);
         window.close();
 
         for (LectioCalendarEvent event : events) {

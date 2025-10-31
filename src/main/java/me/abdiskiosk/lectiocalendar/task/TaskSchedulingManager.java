@@ -11,7 +11,13 @@ public class TaskSchedulingManager {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
     public void executeAndSchedule(int repeatSeconds, @NotNull Runnable task) {
-        scheduler.scheduleAtFixedRate(task, 0, repeatSeconds, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                task.run();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }, 0, repeatSeconds, TimeUnit.SECONDS);
     }
 
 }
