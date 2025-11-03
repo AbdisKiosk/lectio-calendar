@@ -17,7 +17,7 @@ public class LectioWindow {
         this.session = session;
     }
 
-    public @NotNull Collection<LectioCalendarEvent> getEvents(int year, int weekNum) {
+    public @NotNull Collection<LectioCalendarEvent> getEvents(int year, int weekNum) throws Exception {
         System.out.println("LINK: " + generateUrl(year, weekNum));
         session.page().navigate(generateUrl(year, weekNum));
 
@@ -28,7 +28,7 @@ public class LectioWindow {
             return new LectioScheduleParser().parseSchedule(session.page(), weekNum, year);
         } catch (Exception e) {
             System.err.println("Error parsing schedule: " + e.getMessage());
-            return Collections.emptyList();
+            throw new Exception(e);
         }
     }
 

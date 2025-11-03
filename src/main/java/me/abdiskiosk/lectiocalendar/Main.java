@@ -1,6 +1,8 @@
 package me.abdiskiosk.lectiocalendar;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import me.abdiskiosk.lectiocalendar.db.DB;
 import me.abdiskiosk.lectiocalendar.db.dao.LectioCalendarEventDAO;
@@ -18,6 +20,9 @@ public class Main {
 
     private static final String SCHOOL_ID = dotenv.get("SCHOOL_ID");
     private static final String API_KEY = dotenv.get("API_KEY");
+
+    @Getter @Setter
+    private static boolean hasError;
 
 
     @SneakyThrows

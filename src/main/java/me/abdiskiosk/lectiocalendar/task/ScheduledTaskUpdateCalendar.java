@@ -1,15 +1,13 @@
 package me.abdiskiosk.lectiocalendar.task;
 
-import com.microsoft.playwright.Page;
 import lombok.SneakyThrows;
-import me.abdiskiosk.lectiocalendar.calendar.ICSFileGenerator;
+import me.abdiskiosk.lectiocalendar.Main;
 import me.abdiskiosk.lectiocalendar.db.dao.LectioCalendarEventDAO;
 import me.abdiskiosk.lectiocalendar.db.object.LectioCalendarEvent;
 import me.abdiskiosk.lectiocalendar.lectio.LectioClient;
 import me.abdiskiosk.lectiocalendar.lectio.LectioWindow;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -29,33 +27,31 @@ public class ScheduledTaskUpdateCalendar implements Runnable {
 
     @SneakyThrows
     public void run() {
-        System.out.println("Running update calendar");
         int currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
         Date allEventsLastUpdated = calendarEventDAO.getOldest();
         Date currentWeekLastUpdated = calendarEventDAO.getOldest(currentWeek);
-
-        System.out.println("Last updated all events: " + allEventsLastUpdated);
-        System.out.println("Last updated current week: " + currentWeekLastUpdated);
-
 
         boolean updateAllEvents = allEventsLastUpdated == null ||
                 allEventsLastUpdated.before(new Date(System.currentTimeMillis() - ALL_EVENTS_UPDATE_DELAY));
         boolean updateCurrentWeek = currentWeekLastUpdated == null ||
                 currentWeekLastUpdated.before(new Date(System.currentTimeMillis() - CURRENT_WEEK_UPDATE_DELAY));
 
-        System.out.println("Should update all events: " + updateAllEvents);
+        try {
+            if (updateAllEvents) {
+                updateAllEvents();
+            }
 
-        if(updateAllEvents) {
-            updateAllEvents();
-        }
-
-        if(updateCurrentWeek) {
-            updateCurrentWeek();
+            if (updateCurrentWeek) {
+                updateCurrentWeek();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Main.setHasError(true);
         }
 
     }
 
-    public void updateAllEvents() throws SQLException {
+    public void updateAllEvents() throws Exception {
         calendarEventDAO.removeAll();
         LectioWindow window = lectioClient.openWindow();
         List<LectioCalendarEvent> events = new CopyOnWriteArrayList<>();
@@ -82,18 +78,18 @@ public class ScheduledTaskUpdateCalendar implements Runnable {
         }
     }
 
-    public void updateCurrentWeek() throws SQLException {
+    public void updateCurrentWeek() throws Exception {
         int currentWeek = Calendar.getInstance().get(Calendar.WEEK_OF_YEAR);
         int year = Calendar.getInstance().get(Calendar.YEAR);
         boolean isAfterNewYear = currentWeek < 32;
         int baseYear = isAfterNewYear ? year - 1 : year;
 
-        calendarEventDAO.removeWeek(currentWeek);
 
         LectioWindow window = lectioClient.openWindow();
         Collection<LectioCalendarEvent> events = window.getEvents(baseYear , currentWeek);
         window.close();
 
+        calendarEventDAO.removeWeek(currentWeek);
         for (LectioCalendarEvent event : events) {
             calendarEventDAO.insert(event.getTitle(), event.getTeam(), event.getTeachers(), event.getRoom(),
                     event.getState(), event.getQueriedWeekNum(), event.getStart(), event.getEnd());

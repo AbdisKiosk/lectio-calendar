@@ -77,8 +77,8 @@ public class LectioCalendarEventDAO {
         );
     }
 
-    public void removeWeek(int weekNum) throws SQLException {
-        db.update("DELETE FROM lectio_calendar_events WHERE queried_week_num = ?", weekNum);
+    public long removeWeek(int weekNum) throws SQLException {
+        return db.update("DELETE FROM lectio_calendar_events WHERE queried_week_num = ?", weekNum);
     }
 
     public void removeAll() throws SQLException {
