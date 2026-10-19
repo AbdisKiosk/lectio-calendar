@@ -15,17 +15,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class ICSFileGenerator {
-    private static final ZoneId SCHEDULE_ZONE = ZoneId.of("Europe/Copenhagen");
 
     public String generateIcs(Collection<LectioCalendarEvent> events) throws IOException, ValidationException {
         Calendar calendar = new Calendar();
@@ -36,7 +32,7 @@ public class ICSFileGenerator {
         List<LectioCalendarEvent> sortedEvents = new ArrayList<>(events);
         sortedEvents.sort(Comparator.comparing(LectioCalendarEvent::getStart)
                 .thenComparingInt(LectioCalendarEvent::getId));
-        Set<LocalDate> daysWithReminder = new HashSet<>();
+        Map<LectioCalendarEvent, Integer> reminders = EventReminders.minutesBefore(events);
         for (LectioCalendarEvent e : sortedEvents) {
             DateTime start = new DateTime(e.getStart());
             DateTime end = new DateTime(e.getEnd());
@@ -75,9 +71,8 @@ public class ICSFileGenerator {
                 ve.add(new Status(e.getState()));
             }
 
-            if (!"CANCELLED".equalsIgnoreCase(e.getState())) {
-                LocalDate day = start.toInstant().atZone(SCHEDULE_ZONE).toLocalDate();
-                int minutesBefore = daysWithReminder.add(day) ? 30 : 5;
+            Integer minutesBefore = reminders.get(e);
+            if (minutesBefore != null) {
                 VAlarm alarm = new VAlarm(Duration.ofMinutes(-minutesBefore));
                 alarm.add(new Action("DISPLAY"));
                 alarm.add(new Description(summary.toString()));
