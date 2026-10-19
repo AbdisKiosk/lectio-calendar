@@ -4,20 +4,28 @@ import me.abdiskiosk.lectiocalendar.db.object.LectioCalendarEvent;
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.*;
 import net.fortuna.ical4j.model.property.immutable.ImmutableCalScale;
 import net.fortuna.ical4j.model.property.immutable.ImmutableVersion;
-import net.fortuna.ical4j.util.RandomUidGenerator;
-import net.fortuna.ical4j.util.UidGenerator;
 import net.fortuna.ical4j.validate.ValidationException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ICSFileGenerator {
+    private static final ZoneId SCHEDULE_ZONE = ZoneId.of("Europe/Copenhagen");
 
     public String generateIcs(Collection<LectioCalendarEvent> events) throws IOException, ValidationException {
         Calendar calendar = new Calendar();
@@ -25,8 +33,11 @@ public class ICSFileGenerator {
         calendar.add(ImmutableVersion.VERSION_2_0);
         calendar.add(ImmutableCalScale.GREGORIAN);
 
-        UidGenerator uidGenerator = new RandomUidGenerator();
-        for (LectioCalendarEvent e : events) {
+        List<LectioCalendarEvent> sortedEvents = new ArrayList<>(events);
+        sortedEvents.sort(Comparator.comparing(LectioCalendarEvent::getStart)
+                .thenComparingInt(LectioCalendarEvent::getId));
+        Set<LocalDate> daysWithReminder = new HashSet<>();
+        for (LectioCalendarEvent e : sortedEvents) {
             DateTime start = new DateTime(e.getStart());
             DateTime end = new DateTime(e.getEnd());
             StringBuilder summary = new StringBuilder();
@@ -62,6 +73,15 @@ public class ICSFileGenerator {
             }
             if (e.getState() != null) {
                 ve.add(new Status(e.getState()));
+            }
+
+            if (!"CANCELLED".equalsIgnoreCase(e.getState())) {
+                LocalDate day = start.toInstant().atZone(SCHEDULE_ZONE).toLocalDate();
+                int minutesBefore = daysWithReminder.add(day) ? 30 : 5;
+                VAlarm alarm = new VAlarm(Duration.ofMinutes(-minutesBefore));
+                alarm.add(new Action("DISPLAY"));
+                alarm.add(new Description(summary.toString()));
+                ve.add(alarm);
             }
 
             calendar.add(ve);
